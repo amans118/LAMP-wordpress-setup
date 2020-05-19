@@ -1,0 +1,8 @@
+---
+- name: Common dependancies for setting LAMP server for wordpress.
+  apt:
+    name:
+      - libapache2-mod-php
+      - python3-pymysql
+      - php-mysql
+    state: present

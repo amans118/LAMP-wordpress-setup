@@ -1,0 +1,13 @@
+---
+- name: Ensure path exists for wordpress.
+  file:
+    path: /var/www/html/
+    state: directory
+    owner: www-data
+    group: www-data
+
+- name: Download wordpress
+  unarchive:
+    src: https://wordpress.org/latest.tar.gz
+    dest: /var/www/html/
+    remote_src: yes

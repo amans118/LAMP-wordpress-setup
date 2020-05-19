@@ -1,0 +1,6 @@
+---
+- name: Add php repositories for newer php versions.
+  apt_repository: repo='ppa:ondrej/php' update_cache=yes
+
+- name: Install PHP
+  apt: name=php state=present

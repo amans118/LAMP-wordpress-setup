@@ -1,0 +1,53 @@
+---
+- hosts: all
+  become: yes
+  gather_facts: true
+
+  vars_files:
+    - vars/default.yml
+
+  pre_tasks:
+    - name: update cache if needed
+      apt: update_cache=yes cache_valid_time=3600
+
+  handlers:
+    - import_tasks: handlers/handlers.yml
+
+  tasks:
+  - import_tasks: tasks/common.yml
+  - import_tasks: tasks/apache.yml
+  - import_tasks: tasks/php.yml
+  - import_tasks: tasks/wordpress.yml
+
+    - name: Setup wordpress configuration
+      template:
+        src: files/wp-config.php.j2
+        dest: /var/www/html/wordpress/wp-config.php
+
+    - name: Copy Apache config file.
+      copy:
+        src: files/default.conf
+        dest: /etc/apache2/sites-enabled/default.conf
+      notify: restart apache
+
+    - name: Remove default virtualhost file.
+      file:
+        path: "/etc/apache2/sites-enabled/000-default.conf"
+        state: absent
+      notify: restart apache
+
+    - name: Create a MySQL database for wordpress.
+      mysql_db:
+        db: "{{ db_name }}"
+        state: present
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+
+    - name: Create a MySQL user for wordpress.
+      mysql_user:
+        name: "{{ db_user }}"
+        password: "{{ db_password }}"
+        priv: "{{ db_name }}.*:ALL"
+        host: localhost
+        state: present
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+
